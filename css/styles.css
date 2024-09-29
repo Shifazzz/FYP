@@ -1,0 +1,212 @@
+/* General Layout Styles for the Dashboard and Pages */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container for Sidebar and Main Content */
+.container-fluid {
+    flex: 1;
+    display: flex;
+    min-height: 100vh; /* Full height without a header */
+    padding-top: 0; /* No extra space at the top */
+    flex-direction: row; /* Sidebar and content side by side */
+}
+
+/* Sidebar Styles */
+#sidebar {
+    position: fixed;
+    top: 0; /* Sidebar starts at the top */
+    left: 0;
+    width: 200px;
+    background-color: #343a40;
+    height: 100vh; /* Full height */
+    z-index: 1;
+    padding-top: 20px;
+    overflow-y: auto; /* Enable scrolling if sidebar content exceeds height */
+}
+
+/* Sidebar Link Styling */
+#sidebar .nav-link {
+    color: white;
+    font-size: 18px;
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+#sidebar .nav-link:hover {
+    background-color: #495057; /* Darker hover effect */
+    border-radius: 4px;
+}
+
+/* Main content area */
+main {
+    margin-left: 200px; /* Ensure space for sidebar */
+    padding: 20px;
+    padding-top: 70px;
+    flex: 1;
+}
+
+/* Adjust the sidebar to have enough space for content */
+#sidebar {
+    width: 200px;
+    background-color: #343a40;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+}
+
+/* Ensure the content does not overlap with the sidebar */
+.container-fluid {
+    margin-left: 200px; /* Matches sidebar width */
+    padding-top: 20px;
+}
+
+
+/* Footer Styles */
+footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Subtle lift on hover */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Shadow effect */
+}
+
+/* Button Hover Effects */
+.btn-block {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-block:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Button shadow */
+}
+
+/* Dashboard Header */
+h2.text-primary {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+p.lead.text-muted {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+/* Responsive Adjustments for Mobile */
+@media (max-width: 768px) {
+    #sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        top: 0;
+    }
+
+    main {
+        margin-left: 0;
+    }
+
+    .card {
+        margin-bottom: 20px;
+    }
+}
+
+/* -------------------- Login Page Styles -------------------- */
+body.login, html.login {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f4f4f9;
+}
+
+/* Login Container */
+.login-container {
+    display: flex;
+    max-width: 1000px;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 90%; /* Ensure responsiveness */
+}
+
+/* Left Section with Image */
+.left-section {
+    flex: 1;
+    background-color: #f4f7fc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-section img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0 0 0 10px;
+}
+
+/* Right Section with Login Form */
+.right-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+}
+
+.right-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form .form-group {
+    margin-bottom: 15px;
+}
+
+form .form-control {
+    padding: 10px;
+    font-size: 16px;
+}
+
+form .btn {
+    background-color: #007bff;
+    border: none;
+    padding: 10px 0;
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+form .btn:hover {
+    background-color: #0056b3;
+}
