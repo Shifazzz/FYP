@@ -2,34 +2,53 @@
 session_start();
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Dummy credentials for testing
-    $users = [
-        'student1' => ['password' => 'password123', 'role' => 'student'],
-        'admin1' => ['password' => 'adminpassword', 'role' => 'admin']
-    ];
+// Database connection
+$servername = "localhost";
+$usernameDB = "root"; // default XAMPP username
+$passwordDB = ""; // default XAMPP password (usually empty)
+$dbname = "FYP"; // replace with your database name
 
+$conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Retrieve form data and sanitize input
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
-    // Check if username exists and password matches
-    if (isset($users[$username]) && $users[$username]['password'] === $password) {
-        $_SESSION['username'] = $username;
-        $_SESSION['role'] = $users[$username]['role'];
+    // Query to check if username exists
+    $sql = "SELECT * FROM users WHERE username = '$username'";
+    $result = $conn->query($sql);
 
-        // Redirect based on role
-        if ($_SESSION['role'] === 'student') {
-            header('Location: student_dashboard.php');
-            exit();
-        } elseif ($_SESSION['role'] === 'admin') {
-            header('Location: admin_dashboard.php');
-            exit();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        
+        // Check if password matches
+        if ($row['password'] === $password) { // Direct comparison
+            $_SESSION['username'] = $row['username'];
+            $_SESSION['role'] = $row['role'];
+
+            // Redirect based on role
+            if ($_SESSION['role'] === 'student') {
+                header('Location: student_dashboard.php');
+                exit();
+            } elseif ($_SESSION['role'] === 'admin') {
+                header('Location: admin_dashboard.php');
+                exit();
+            }
+        } else {
+            $error = 'Invalid username or password';
         }
     } else {
         $error = 'Invalid username or password';
     }
 }
+
+$conn->close(); // Close connection
 ?>
 
 <!DOCTYPE html>
@@ -45,72 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     <!-- Custom styles -->
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f4f4f9;
-        }
-
-        .login-container {
-            display: flex;
-            max-width: 900px;
-            width: 100%;
-            background-color: white;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .left-section {
-            flex: 1;
-            background-color: #f4f7fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .left-section img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 0 0 0 10px;
-        }
-
-        .right-section {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background-color: #ffffff;
-        }
-
-        .right-section h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-family: 'Arial', sans-serif;
-            color: #333;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-
-        .form-group label {
-            font-weight: bold;
-        }
-
-        .alert-danger {
-            margin-bottom: 20px;
-        }
+        /* Your existing styles */
     </style>
 </head>
 <body>
@@ -140,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Login</button>
+                <p class="mt-3">Don't have an account? <a href="register.php">Register here</a></p>
             </form>
         </div>
     </div>
