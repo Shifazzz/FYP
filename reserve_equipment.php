@@ -1,67 +1,103 @@
 <?php
 session_start();
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'student') {
-    header('Location: login.php');
-    exit();
+$error = '';
+$success = '';
+
+// Database connection
+$servername = "localhost";
+$usernameDB = "root"; // XAMPP username
+$passwordDB = ""; // XAMPP password (usually empty)
+$dbname = "FYP"; // Your database name
+
+$conn = new mysqli($servername, $usernameDB, $passwordDB, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-include 'includes/header.php'; // Include the header with user info
-include 'includes/sidebar.php'; // Include sidebar for navigation
+// Fetch available equipment for reservation
+$sql = "SELECT * FROM equipment WHERE status = 'available'";
+$equipment_result = $conn->query($sql);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Check if the user is logged in
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id']; // Retrieve user_id from session
+    } else {
+        die("User not logged in");
+    }
+
+    $equipment_id = $_POST['equipment_id'];
+    $reservation_date = $_POST['reservation_date'];
+    $return_date = $_POST['return_date'];
+
+    // Use prepared statement for reservation insertion
+    $stmt = $conn->prepare("INSERT INTO reservations (user_id, equipment_id, reservation_date, return_date, status) VALUES (?, ?, ?, ?, 'pending')");
+    $stmt->bind_param("iiss", $user_id, $equipment_id, $reservation_date, $return_date);
+
+    if ($stmt->execute()) {
+        $success = "Reservation request submitted successfully!";
+        // Optionally, update the equipment status
+        $sql_update = "UPDATE equipment SET status = 'reserved' WHERE equipment_id = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param("i", $equipment_id);
+        $stmt_update->execute();
+    } else {
+        $error = "Error: " . $stmt->error;
+    }
+}
+
+$conn->close(); // Close the connection
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Reserve Equipment</title>
-    
-    <!-- Bootstrap for Styling -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<main class="container-fluid" style="margin-left: 200px;"> <!-- Adjust to match sidebar width -->
-    <div class="row">
-        <!-- Main content area -->
-        <div class="col-md-8 offset-md-2"> <!-- Adjusted for better alignment -->
-            <h2 class="text-primary mb-4">Reserve Equipment</h2>
-
-            <!-- Equipment Reservation Form -->
-            <form method="post" action="process_reservation.php" class="shadow p-4 rounded bg-light">
-                <!-- Equipment Selection -->
-                <div class="form-group">
-                    <label for="equipment" class="font-weight-bold">Select Equipment:</label>
-                    <select id="equipment" name="equipment" class="form-control" required>
-                        <option value="">-- Select Equipment --</option>
-                        <option value="Camera">Camera</option>
-                        <option value="Projector">Projector</option>
-                        <option value="Microphone">Microphone</option>
-                        <option value="Lighting Kit">Lighting Kit</option>
-                    </select>
-                </div>
-
-                <!-- Reservation Date -->
-                <div class="form-group">
-                    <label for="date" class="font-weight-bold">Reservation Date:</label>
-                    <input type="date" id="date" name="date" class="form-control" required>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-block">Reserve</button>
-            </form>
+<div class="container mt-5">
+    <h2>Reserve Equipment</h2>
+    <?php if ($error): ?>
+        <div class="alert alert-danger">
+            <?php echo $error; ?>
         </div>
-    </div>
-</main>
-
-<!-- Footer -->
-<?php include 'includes/footer.php'; ?>
-
-<!-- Bootstrap JS and dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <?php endif; ?>
+    <?php if ($success): ?>
+        <div class="alert alert-success">
+            <?php echo $success; ?>
+        </div>
+    <?php endif; ?>
+    
+    <form method="POST" action="reserve_equipment.php">
+        <div class="form-group">
+            <label for="equipment_id">Select Equipment</label>
+            <select class="form-control" id="equipment_id" name="equipment_id" required>
+                <?php while ($row = $equipment_result->fetch_assoc()): ?>
+                    <option value="<?php echo $row['equipment_id']; ?>">
+                        <?php echo $row['label'] . " - " . $row['brand']; ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="reservation_date">Reservation Date</label>
+            <input type="date" class="form-control" id="reservation_date" name="reservation_date" required>
+        </div>
+        <div class="form-group">
+            <label for="return_date">Return Date</label>
+            <input type="date" class="form-control" id="return_date" name="return_date" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Reserve</button>
+    </form>
+</div>
 
 </body>
 </html>

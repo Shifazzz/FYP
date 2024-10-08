@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Check if password matches
         if ($row['password'] === $password) { // Direct comparison
             $_SESSION['username'] = $row['username'];
+            $_SESSION['user_id'] = $row['user_id'];
             $_SESSION['role'] = $row['role'];
 
             // Redirect based on role
